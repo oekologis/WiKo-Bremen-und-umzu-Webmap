@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiKo Bremen und umzu</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style type="text/css">
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+        #map { width: 100%; height: 100%; background: #f0f0f0; }
+        
+        /* --- STAND ANZEIGE --- */
+        .date-box {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            z-index: 1001;
+            background: white;
+            padding: 8px 12px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- NAVIGATION --- */
+        .map-navigation {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap; 
+            justify-content: flex-end;
+            max-width: 350px;
+        }
+
+        .map-navigation button {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .map-navigation button:hover { background: #e0e0e0; }
+
+        /* --- LEGENDE --- */
+        .custom-legend {
+            position: fixed;
+            bottom: 100px; 
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            line-height: 1.5;
+            max-height: 65vh;
+            overflow-y: auto;
+            width: 260px;
+        }
+
+        .legend-header {
+            display: block; 
+            margin-bottom: 8px; 
+            border-bottom: 1px solid #ccc; 
+            padding-bottom: 3px;
+            font-weight: bold;
+        }
+
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-symbol { width: 18px; height: 18px; margin-right: 12px; flex-shrink: 0; object-fit: contain; }
+        .color-box { border: 1px solid #000; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="date-box">Stand: 14.04.2026</div>
+
+    <div class="map-navigation">
+        <button onclick="jumpToSJL()">St. Jürgensland</button>
+        <button onclick="jumpToBL()">Blockland</button>
+        <button onclick="jumpToKW()">Kladdinger Wiesen</button>
+        <button onclick="jumpToNV()">Niedervieland</button>
+    </div>
+
+    <div class="custom-legend">
+        <span class="legend-header">Vogelarten</span>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#53a4d9;"></span>Kiebitz</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#49f90e;"></span>Uferschnepfe</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#ff7f00;"></span>Brachvogel</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#ff3b55;"></span>Rotschenkel</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#fff201;"></span>Bekassine</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#fca9e2;"></span>Löffelente</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#c3ebff;"></span>Knäkente</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#a3483b;"></span>Austernfischer</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#8570e4;"></span>Sumpfohreule</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#fdbf6f;"></span>Wachtelkönig</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#6cf4c9;"></span>Tüpfelsumpfhuhn</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#ffffff;"></span>Höckerschwan</div>
+        <div class="legend-item"><span class="legend-symbol color-box" style="background:#7b797b;"></span>Andere Arten</div>
+
+        <span class="legend-header" style="margin-top: 15px;">Status</span>
+        <div class="legend-item"><img src="icons/s0.png" class="legend-symbol">Revierverhalten</div>
+        <div class="legend-item"><img src="icons/s1.png" class="legend-symbol">Bereich mit Nestverdacht</div>
+        <div class="legend-item"><img src="icons/s2.png" class="legend-symbol">Vogel brütet (Schutzbedarf!)</div>
+        <div class="legend-item"><img src="icons/s3.png" class="legend-symbol">Vogel brütet (Schutzgitter)</div>
+        <div class="legend-item"><img src="icons/s4.png" class="legend-symbol">Vogel brütet (eingezäunt)</div>
+        <div class="legend-item"><img src="icons/s5.png" class="legend-symbol">Vogel brütet (nicht markiert)</div>
+        <div class="legend-item"><img src="icons/s6.png" class="legend-symbol">Vogel brütet (markiert)</div>
+        <div class="legend-item"><img src="icons/s7.png" class="legend-symbol">Vogel brütet (Grasinsel)</div>
+        <div class="legend-item"><img src="icons/s8.png" class="legend-symbol">Schlüpferfolg</div>
+        <div class="legend-item"><img src="icons/s9.png" class="legend-symbol">Verlust (Prädation/Aufgabe)</div>
+        <div class="legend-item"><img src="icons/s13.png" class="legend-symbol">Standort unbekannt</div>
+
+        <span class="legend-header" style="margin-top: 15px;">Kameras</span>
+        <div class="legend-item"><img src="icons/cam_active.png" class="legend-symbol">Kamera aufgestellt</div>
+        <div class="legend-item"><img src="icons/cam_hist.png" class="legend-symbol">Kamera historischer Standort</div>
+    </div>
+
+    <script>
+        // 1. Hintergrundkarten
+        var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        });
+
+        var google_sat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps'
+        });
+
+        // 2. Kacheln der vier Teilgebiete
+        var tiles_sjl = L.tileLayer('./tiles_sjl/{z}/{x}/{y}.png', { minZoom: 6, maxZoom: 20, tms: false, opacity: 1.0 });
+        var tiles_bl = L.tileLayer('./tiles_bl/{z}/{x}/{y}.png', { minZoom: 6, maxZoom: 20, tms: false, opacity: 1.0 });
+        var tiles_kw = L.tileLayer('./tiles_kw/{z}/{x}/{y}.png', { minZoom: 6, maxZoom: 20, tms: false, opacity: 1.0 });
+        var tiles_nv = L.tileLayer('./tiles_nv/{z}/{x}/{y}.png', { minZoom: 6, maxZoom: 20, tms: false, opacity: 1.0 });
+
+        // 3. Initialisierung der Karte
+        var map = L.map('map', {
+            center: [53.11, 8.80], 
+            zoom: 11,
+            layers: [osm, tiles_sjl, tiles_bl, tiles_kw, tiles_nv] 
+        });
+
+        // 4. Layer-Schalter (Unten Links)
+        var baseMaps = {
+            "Karte (OSM)": osm,
+            "Luftbild (Google)": google_sat
+        };
+
+        var overlayMaps = {
+            "St. Jürgensland": tiles_sjl,
+            "Blockland": tiles_bl,
+            "Kladdinger Wiesen": tiles_kw,
+            "Niedervieland": tiles_nv
+        };
+
+        L.control.layers(baseMaps, overlayMaps, {
+            collapsed: false,
+            position: 'bottomleft' 
+        }).addTo(map);
+
+        // 5. Sprung-Funktionen (verbesserte Koordinaten)
+        function jumpToSJL() {
+            map.flyTo([53.169613, 8.834120], 13, { duration: 1.5 });
+        }
+
+        function jumpToBL() {
+            map.flyTo([53.141787, 8.805679], 13, { duration: 1.5 });
+        }
+
+        function jumpToKW() {
+            map.flyTo([53.03, 8.76], 13, { duration: 1.5 });
+        }
+
+        function jumpToNV() {
+            map.flyTo([53.105425, 8.679951], 13, { duration: 1.5 });
+        }
+    </script>
+</body>
+</html>
