@@ -161,7 +161,7 @@
 <body>
 
 <div id="map"></div>
-<div class="date-box">Stand: 14.04.2026</div>
+<div class="date-box">Stand: 15.04.2026</div>
 
 <!-- Oben links: Statistik + Gebiete -->
 <div class="top-left-controls">
@@ -265,7 +265,7 @@ var tOpts = {
     var tiles_wn  = L.tileLayer('./tiles_wn/{z}/{x}/{y}.png',  tOpts);
 
     var map = L.map('map', {
-        center: [53.11, 8.80], zoom: 11,
+        center: [53.094460, 8.894476], zoom: 11,
         zoomControl: false,
         layers: [osm, tiles_sjl, tiles_bl, tiles_kw, tiles_nv, tiles_bw, tiles_wn]
     });
@@ -312,11 +312,11 @@ var tOpts = {
     // Struktur: { Gebiet: { Art: [gelege, schlupf, verlust], ... }, ... }
     var statsData = {
         'Blockland': {
-            'Kiebitz':      [0, 0, 0],
-            'Uferschnepfe': [0, 0, 0],
-            'Brachvogel':   [0, 0, 0],
-            'Rotschenkel':  [0, 0, 0],
-            'Sumpfohreule': [0, 0, 0]
+            'Kiebitz':      [389, 46, 96],
+            'Uferschnepfe': [36, 0, 3],
+            'Brachvogel':   [21, 0, 1],
+            'Rotschenkel':  [4, 0, 0],
+            'Sumpfohreule': [2, 0, 0]
         },
         'Borgfelder Wümmewiesen': {
             'Kiebitz':      [0, 0, 0],
@@ -326,32 +326,32 @@ var tOpts = {
             'Sumpfohreule': [0, 0, 0]
         },
         'Kladdinger Wiesen': {
-            'Kiebitz':      [0, 0, 0],
-            'Uferschnepfe': [0, 0, 0],
-            'Brachvogel':   [0, 0, 0],
-            'Rotschenkel':  [0, 0, 0],
-            'Sumpfohreule': [0, 0, 0]
+            'Kiebitz':      [32, 8, 4],
+        //  'Uferschnepfe': [0, 0, 0],
+        //    'Brachvogel':   [0, 0, 0],
+        //     'Rotschenkel':  [0, 0, 0],
+        //     'Sumpfohreule': [0, 0, 0] 
         },
         'Niedervieland': {
-            'Kiebitz':      [0, 0, 0],
-            'Uferschnepfe': [0, 0, 0],
-            'Brachvogel':   [0, 0, 0],
-            'Rotschenkel':  [0, 0, 0],
-            'Sumpfohreule': [0, 0, 0]
+            'Kiebitz':      [89, 1, 9],
+            'Uferschnepfe': [4, 0, 0],
+            'Brachvogel':   [6, 0, 1],
+       //     'Rotschenkel':  [0, 0, 0],
+       //     'Sumpfohreule': [0, 0, 0]
         },
         'St. Jürgensland': {
-            'Kiebitz':      [0, 0, 0],
-            'Uferschnepfe': [0, 0, 0],
-            'Brachvogel':   [0, 0, 0],
-            'Rotschenkel':  [0, 0, 0],
-            'Sumpfohreule': [0, 0, 0]
+            'Kiebitz':      [95, 10, 23],
+        //    'Uferschnepfe': [0, 0, 0],
+            'Brachvogel':   [5, 0, 0],
+        //    'Rotschenkel':  [0, 0, 0],
+        //    'Sumpfohreule': [0, 0, 0]
         },
         'Wümmeniederung': {
-            'Kiebitz':      [0, 0, 0],
-            'Uferschnepfe': [0, 0, 0],
-            'Brachvogel':   [0, 0, 0],
-            'Rotschenkel':  [0, 0, 0],
-            'Sumpfohreule': [0, 0, 0]
+       //     'Kiebitz':      [17, 0, 3],
+       //     'Uferschnepfe': [0, 0, 0],
+       //     'Brachvogel':   [0, 0, 0],
+      //      'Rotschenkel':  [0, 0, 0],
+      //      'Sumpfohreule': [0, 0, 0]
         }
     };
 
