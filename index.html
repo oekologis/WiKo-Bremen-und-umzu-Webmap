@@ -140,6 +140,7 @@
             .gebiete-grid { grid-template-columns: 1fr; min-width: 220px; }
             .stat-table { min-width: unset; font-size: 11px; }
         }
+
     </style>
 </head>
 <body>
@@ -173,7 +174,7 @@
 <div class="overlay-backdrop" id="statistik-overlay" onclick="backdropClose(event, 'statistik-overlay')">
     <div class="overlay-box">
         <button class="overlay-close" onclick="closeOverlay('statistik-overlay')">✕</button>
-        <h2>Brutsaison 2026 – Übersicht</h2>
+        <h2>WiKo Bremen und umzu 2026 – Übersicht</h2>
         <div id="stat-container"></div>
     </div>
 </div>
@@ -219,8 +220,17 @@
 
 <script>
     // ── Karte ──────────────────────────────────────────────
-    var tOpts = { minZoom: 6, maxZoom: 20, detectRetina: false };
-
+   // var tOpts = { minZoom: 6, maxZoom: 20, detectRetina: false };
+var tOpts = { 
+    minZoom: 6, 
+    maxZoom: 22,          // Erlaube tieferes Zoomen
+    maxNativeZoom: 19,    // Deine Kacheln hören bei 20 auf
+    tileSize: 256,        // Bleibe bei Standardgröße
+    zoomOffset: 0,
+    opacity: 1.0,
+    updateWhenIdle: true, // Verhindert Flackern
+    keepBuffer: 2         // Lädt Kacheln im Umfeld vor für glattere Übergänge
+};
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         subdomains: ['a','b','c'],
         maxZoom: 19,
@@ -351,7 +361,7 @@
         thead.innerHTML = '<tr>' +
             '<th>Art</th>' +
             '<th>Erfasste<br>Gelege</th>' +
-            '<th>Schlupf-<br>erfolg</th>' +
+            '<th>Schlüpf-<br>erfolge</th>' +
             '<th>Gelege-<br>verluste</th>' +
             '</tr>';
         table.appendChild(thead);
