@@ -9,65 +9,46 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-   <style type="text/css">
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #fff; font-family: sans-serif; }
+    <style>
+        /* ── BASIS ── */
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; background: #fff; font-family: sans-serif;
+        }
         #map { width: 100%; height: 100%; }
 
         .leaflet-popup-content-wrapper,
-        .leaflet-popup-tip {
-            background: white !important;
-            color: #333;
-        }
+        .leaflet-popup-tip { background: white !important; color: #333; }
 
-        /* ── GEMEINSAME BASIS FÜR CONTROLS ── */
-       .top-btn, .date-box {
-            background: white; 
-            color: #333; 
-            border: 2px solid rgba(0,0,0,0.2); 
-            border-radius: 6px;
-            padding: 0 10px; /* Nur seitliches Padding, oben/unten wird über 'height' gesteuert */
-            height: 34px; /* Exakte Höhe für Buttons UND Datums-Box erzwingen */
-            box-sizing: border-box; /* Rahmen wird in die Höhe miteinberechnet */
-            font-size: 13px; /* Einheitliche Schriftgröße für alle */
-            font-family: inherit; /* Verhindert, dass der Button eine andere System-Schrift nutzt */
-            font-weight: bold;
+        /* ── GEMEINSAME CONTROL-BASIS ── */
+        .top-btn, .date-box {
+            background: white; color: #333;
+            border: 2px solid rgba(0,0,0,0.2); border-radius: 6px;
+            padding: 0 10px; height: 34px; box-sizing: border-box;
+            font-size: 13px; font-family: inherit; font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            white-space: nowrap;
-            display: flex;
-            align-items: center; /* Zentriert den Text vertikal exakt in der Mitte */
+            white-space: nowrap; display: flex; align-items: center;
         }
+        .top-btn { cursor: pointer; }
+        .top-btn:hover { background: #f0f0f0; }
 
-        /* ── OBEN LINKS (Gebiete & Statistik) ── */
+        /* ── OBEN LINKS ── */
         .top-left-controls {
             position: fixed; top: 10px; left: 10px; z-index: 1003;
             display: flex; gap: 8px; align-items: center;
         }
 
-        .top-btn {
-            cursor: pointer;
-        }
-        .top-btn:hover { background: #f0f0f0; }
-
-        /* ── OBEN RECHTS (Stand Datum) ── */
-       .date-box {
+        /* ── OBEN RECHTS ── */
+        .date-box {
             position: fixed; top: 10px; right: 10px; z-index: 1003;
             pointer-events: none;
-            /* Der font-size: 12px Override wurde hier komplett gelöscht! */
         }
 
-        /* Rechte Seite – Legende */
+        /* ── RECHTE SEITE (Legende + Info-Button) ── */
         .right-controls {
             position: fixed; top: 50px; bottom: 20px; right: 10px; z-index: 1002;
             display: flex; flex-direction: column; justify-content: flex-end;
             gap: 10px; align-items: flex-end;
-        }
-
-        .info-btn {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: white; color: #333; border: 2px solid rgba(0,0,0,0.2);
-            font-family: serif; font-size: 22px; font-weight: bold; font-style: italic;
-            cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15); display: none;
-            align-items: center; justify-content: center;
         }
 
         .custom-legend {
@@ -76,32 +57,40 @@
             line-height: 1.4; max-height: calc(100vh - 120px); overflow-y: auto; width: 250px;
         }
 
-        .legend-header { display: block; margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 3px; font-weight: bold; color: #333; }
+        /* Info-Button: Standard unsichtbar, Mobile sichtbar */
+        .info-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: white; color: #333; border: 2px solid rgba(0,0,0,0.2);
+            font-family: serif; font-size: 22px; font-weight: bold; font-style: italic;
+            cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            display: none; align-items: center; justify-content: center;
+        }
+
+        /* ── LEGENDE INHALTE ── */
+        .legend-header {
+            display: block; margin-bottom: 6px; padding-bottom: 3px;
+            border-bottom: 1px solid #eee; font-weight: bold; color: #333;
+        }
         .legend-item { display: flex; align-items: center; margin-bottom: 4px; }
         .legend-symbol { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; object-fit: contain; }
         .color-box { border: 1px solid #000; border-radius: 2px; }
 
         /* ── OVERLAYS ── */
         .overlay-backdrop {
-            display: none;
-            position: fixed; inset: 0; z-index: 2000;
-            background: rgba(0,0,0,0.45);
-            align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(0,0,0,0.45); align-items: center; justify-content: center;
         }
         .overlay-backdrop.open { display: flex; }
 
         .overlay-box {
-            background: white; border-radius: 12px;
-            padding: 20px 24px; max-width: 95vw;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            position: relative; max-height: 90vh; overflow-y: auto;
+            background: white; border-radius: 12px; padding: 20px 24px;
+            max-width: 95vw; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25); position: relative;
         }
-
         .overlay-box h2 {
-            margin: 0 0 16px 0; font-size: 16px; font-weight: bold; color: #222;
-            padding-right: 28px;
+            margin: 0 0 16px 0; font-size: 16px; font-weight: bold;
+            color: #222; padding-right: 28px;
         }
-
         .overlay-close {
             position: absolute; top: 14px; right: 16px;
             background: none; border: none; font-size: 20px;
@@ -109,20 +98,22 @@
         }
         .overlay-close:hover { color: #111; }
 
-        /* Gebiete-Popup */
+        /* Statistik-Overlay Breite */
+        #statistik-overlay .overlay-box { max-width: 480px; width: auto; }
+
+        /* ── GEBIETE-GRID ── */
         .gebiete-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 300px;
         }
         .gebiete-grid button {
             background: #f8f8f8; border: 1px solid #ccc; border-radius: 6px;
-            padding: 12px 10px; /* Horizontales Padding reduziert */
-            cursor: pointer; font-size: 13px; font-weight: bold;
+            padding: 12px 10px; cursor: pointer; font-size: 13px; font-weight: bold;
             text-align: left; transition: background 0.15s;
         }
         .gebiete-grid button:hover { background: #e8e8e8; }
 
-        /* ── Statistik-Tabelle ── */
-        .stat-section { margin-bottom: 18px; }
+        /* ── STATISTIK-TABELLE ── */
+        .stat-section { margin-bottom: 18px; width: fit-content; }
         .stat-section-title {
             font-size: 13px; font-weight: bold; color: #444;
             background: #f0f0f0; padding: 5px 9px;
@@ -130,31 +121,35 @@
             border-bottom: none; margin: 0;
         }
         .stat-table {
-            border-collapse: collapse; font-size: 12px; width: 100%; min-width: 420px;
+            border-collapse: collapse; font-size: 12px;
+            width: auto; min-width: 320px; max-width: 100%; table-layout: fixed;
         }
         .stat-table th, .stat-table td {
-            border: 1px solid #ddd; padding: 6px 7px; /* Horizontales Padding in Tabellen reduziert */
-            text-align: center;
+            border: 1px solid #ddd; padding: 6px 4px;
+            text-align: center; overflow: hidden; text-overflow: ellipsis;
         }
-        .stat-table th {
-            background: #f5f5f5; font-weight: bold; color: #333;
+        .stat-table th:nth-child(1), .stat-table td:nth-child(1) {
+            width: 34%; text-align: left; background: #fafafa; padding-left: 8px;
         }
-        .stat-table td:first-child {
-            text-align: left; background: #fafafa; white-space: nowrap;
-        }
+        .stat-table th:nth-child(2), .stat-table td:nth-child(2),
+        .stat-table th:nth-child(3), .stat-table td:nth-child(3),
+        .stat-table th:nth-child(4), .stat-table td:nth-child(4) { width: 22%; }
+        .stat-table th { background: #f5f5f5; font-weight: bold; color: #333; vertical-align: middle; }
         .stat-table tr:nth-child(even) td { background: #fafff8; }
         .stat-table tr:nth-child(even) td:first-child { background: #f5f9f5; }
 
-        /* ── RESPONSIVE ── */
+       /* ── RESPONSIVE (NUR FÜR LEGENDE) ── */
         @media (min-width: 601px) {
             .info-btn { display: none !important; }
             .custom-legend { display: block !important; }
         }
+
         @media (max-width: 600px) {
             .info-btn { display: flex !important; }
-            .custom-legend { display: none; max-height: calc(100vh - 80px); }
-            .gebiete-grid { grid-template-columns: 1fr; min-width: 220px; }
-            .stat-table { min-width: unset; font-size: 11px; }
+            .custom-legend { 
+                display: none; 
+                max-height: calc(100vh - 80px); 
+            }
         }
     </style>
 </head>
@@ -163,14 +158,13 @@
 <div id="map"></div>
 <div class="date-box">Stand: 15.04.2026</div>
 
-<!-- Oben links: Statistik + Gebiete -->
 <div class="top-left-controls">
     <button class="top-btn" onclick="openOverlay('gebiete-overlay')">📍 Gebiete</button>
     <button class="top-btn" onclick="openOverlay('statistik-overlay')">📊 Statistik</button>
 </div>
 
 <!-- Gebiete Overlay -->
-<div class="overlay-backdrop" id="gebiete-overlay" onclick="backdropClose(event, 'gebiete-overlay')">
+<div class="overlay-backdrop" id="gebiete-overlay" onclick="backdropClose(event,'gebiete-overlay')">
     <div class="overlay-box">
         <button class="overlay-close" onclick="closeOverlay('gebiete-overlay')">✕</button>
         <h2>Zoom auf Gebiet</h2>
@@ -186,7 +180,7 @@
 </div>
 
 <!-- Statistik Overlay -->
-<div class="overlay-backdrop" id="statistik-overlay" onclick="backdropClose(event, 'statistik-overlay')">
+<div class="overlay-backdrop" id="statistik-overlay" onclick="backdropClose(event,'statistik-overlay')">
     <div class="overlay-box">
         <button class="overlay-close" onclick="closeOverlay('statistik-overlay')">✕</button>
         <h2>WiKo Bremen und umzu 2026 – Übersicht</h2>
@@ -194,7 +188,7 @@
     </div>
 </div>
 
-<!-- Rechte Seite: Legende -->
+<!-- Rechte Seite: Legende + Info-Button -->
 <div class="right-controls">
     <div id="legend" class="custom-legend">
         <span class="legend-header">Vogelarten</span>
@@ -212,7 +206,7 @@
         <div class="legend-item"><span class="legend-symbol color-box" style="background:#ffffff;"></span>Höckerschwan</div>
         <div class="legend-item"><span class="legend-symbol color-box" style="background:#7b797b;"></span>Andere Arten</div>
 
-        <span class="legend-header" style="margin-top: 12px;">Status</span>
+        <span class="legend-header" style="margin-top:12px;">Status</span>
         <div class="legend-item"><img src="icons/s0.png" class="legend-symbol">Revierverhalten</div>
         <div class="legend-item"><img src="icons/s1.png" class="legend-symbol">Nestverdacht</div>
         <div class="legend-item"><img src="icons/s2.png" class="legend-symbol">Brut (Schutzbedarf!)</div>
@@ -225,7 +219,7 @@
         <div class="legend-item"><img src="icons/s9.png" class="legend-symbol">Verlust</div>
         <div class="legend-item"><img src="icons/s13.png" class="legend-symbol">Standort unbekannt</div>
 
-        <span class="legend-header" style="margin-top: 12px;">Kameras</span>
+        <span class="legend-header" style="margin-top:12px;">Kameras</span>
         <div class="legend-item"><img src="icons/cam_active.png" class="legend-symbol">Kamera aufgestellt</div>
         <div class="legend-item"><img src="icons/cam_hist.png" class="legend-symbol">Kamera historisch</div>
     </div>
@@ -235,20 +229,14 @@
 
 <script>
     // ── Karte ──────────────────────────────────────────────
-   // var tOpts = { minZoom: 6, maxZoom: 20, detectRetina: false };
-var tOpts = { 
-    minZoom: 6, 
-    maxZoom: 22,          // Erlaube tieferes Zoomen
-    maxNativeZoom: 18,    // Deine Kacheln hören bei 18 auf
-    tileSize: 256,        // Bleibe bei Standardgröße
-    zoomOffset: 0,
-    opacity: 1.0,
-    updateWhenIdle: true, // Verhindert Flackern
-    keepBuffer: 2         // Lädt Kacheln im Umfeld vor für glattere Übergänge
-};
+    var tOpts = {
+        minZoom: 6, maxZoom: 22, maxNativeZoom: 18,
+        tileSize: 256, zoomOffset: 0, opacity: 1.0,
+        updateWhenIdle: true, keepBuffer: 2
+    };
+
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        subdomains: ['a','b','c'],
-        maxZoom: 19,
+        subdomains: ['a','b','c'], maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         crossOrigin: true
     });
@@ -288,28 +276,24 @@ var tOpts = {
     function jumpToBL()  { map.flyTo([53.141787, 8.805679], 13); }
     function jumpToKW()  { map.flyTo([53.03,     8.76],     13); }
     function jumpToNV()  { map.flyTo([53.105425, 8.679951], 13); }
-    function jumpToBW()  { map.flyTo([53.133195, 8.945494],     13); }
-    function jumpToWN()  { map.flyTo([53.097790, 8.976316],     13); }
+    function jumpToBW()  { map.flyTo([53.133195, 8.945494], 13); }
+    function jumpToWN()  { map.flyTo([53.097790, 8.976316], 13); }
 
-    // ── Legende Mobile ────────────────────────────────────
+    // ── Legende (Mobile) ───────────────────────────────────
     function toggleLegend() {
         var el = document.getElementById('legend');
         el.style.display = (el.style.display === 'block') ? 'none' : 'block';
     }
 
     // ── Overlays ───────────────────────────────────────────
-    function openOverlay(id) {
-        document.getElementById(id).classList.add('open');
-    }
-    function closeOverlay(id) {
-        document.getElementById(id).classList.remove('open');
-    }
+    function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+    function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
     function backdropClose(e, id) {
         if (e.target === document.getElementById(id)) closeOverlay(id);
     }
 
     // ── Statistik-Daten (hier anpassen) ───────────────────
-    // Struktur: { Gebiet: { Art: [gelege, schlupf, verlust], ... }, ... }
+    // Nicht benötigte Arten einfach auskommentieren
     var statsData = {
         'Blockland': {
             'Kiebitz':      [389, 46, 96],
@@ -328,30 +312,30 @@ var tOpts = {
         'Kladdinger Wiesen': {
             'Kiebitz':      [32, 8, 4],
         //  'Uferschnepfe': [0, 0, 0],
-        //    'Brachvogel':   [0, 0, 0],
-        //     'Rotschenkel':  [0, 0, 0],
-        //     'Sumpfohreule': [0, 0, 0] 
+        //  'Brachvogel':   [0, 0, 0],
+        //  'Rotschenkel':  [0, 0, 0],
+        //  'Sumpfohreule': [0, 0, 0]
         },
         'Niedervieland': {
             'Kiebitz':      [89, 1, 9],
             'Uferschnepfe': [4, 0, 0],
             'Brachvogel':   [6, 0, 1],
-       //     'Rotschenkel':  [0, 0, 0],
-       //     'Sumpfohreule': [0, 0, 0]
+        //  'Rotschenkel':  [0, 0, 0],
+        //  'Sumpfohreule': [0, 0, 0]
         },
         'St. Jürgensland': {
             'Kiebitz':      [95, 10, 23],
-        //    'Uferschnepfe': [0, 0, 0],
+        //  'Uferschnepfe': [0, 0, 0],
             'Brachvogel':   [5, 0, 0],
-        //    'Rotschenkel':  [0, 0, 0],
-        //    'Sumpfohreule': [0, 0, 0]
+        //  'Rotschenkel':  [0, 0, 0],
+        //  'Sumpfohreule': [0, 0, 0]
         },
         'Wümmeniederung': {
-       //     'Kiebitz':      [17, 0, 3],
-       //     'Uferschnepfe': [0, 0, 0],
-       //     'Brachvogel':   [0, 0, 0],
-      //      'Rotschenkel':  [0, 0, 0],
-      //      'Sumpfohreule': [0, 0, 0]
+            'Kiebitz':      [17, 0, 3],
+        //  'Uferschnepfe': [0, 0, 0],
+        //  'Brachvogel':   [0, 0, 0],
+        //  'Rotschenkel':  [0, 0, 0],
+        //  'Sumpfohreule': [0, 0, 0]
         }
     };
 
@@ -373,22 +357,22 @@ var tOpts = {
         table.className = 'stat-table';
 
         var thead = document.createElement('thead');
-        thead.innerHTML = '<tr>' +
-            '<th>Art</th>' +
+        thead.innerHTML =
+            '<tr><th>Art</th>' +
             '<th>Erfasste<br>Gelege</th>' +
             '<th>Schlüpf-<br>erfolge</th>' +
-            '<th>Gelege-<br>verluste</th>' +
-            '</tr>';
+            '<th>Gelege-<br>verluste</th></tr>';
         table.appendChild(thead);
 
         var tbody = document.createElement('tbody');
         Object.keys(arten).forEach(function(art) {
-            var vals = arten[art];
+            var v = arten[art];
             var tr = document.createElement('tr');
-            tr.innerHTML = '<td>' + art + '</td>' +
-                '<td>' + (vals[0] !== 0 ? vals[0] : '–') + '</td>' +
-                '<td>' + (vals[1] !== 0 ? vals[1] : '–') + '</td>' +
-                '<td>' + (vals[2] !== 0 ? vals[2] : '–') + '</td>';
+            tr.innerHTML =
+                '<td>' + art + '</td>' +
+                '<td>' + (v[0] !== 0 ? v[0] : '–') + '</td>' +
+                '<td>' + (v[1] !== 0 ? v[1] : '–') + '</td>' +
+                '<td>' + (v[2] !== 0 ? v[2] : '–') + '</td>';
             tbody.appendChild(tr);
         });
         table.appendChild(tbody);
